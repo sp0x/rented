@@ -18,19 +18,12 @@ import (
 var aptIndexer string
 
 func init() {
-	cmdGetApartments := &cobra.Command{
-		Use:   "apartments",
-		Short: "Finds appartments using indexers",
-		Run:   findAppartments,
-	}
 	//flags := cmdGetApartments.Flags()
-
 	_ = viper.BindEnv("indexer")
 	_ = viper.BindEnv("telegram_token")
-	rootCmd.AddCommand(cmdGetApartments)
 }
 
-func findAppartments(cmd *cobra.Command, args []string) {
+func findApartments(cmd *cobra.Command, args []string) {
 	flags := cmd.Flags()
 	flags.StringVarP(&aptIndexer, "indexer", "x", "cityapartment", "The appartment site to use.")
 	_ = viper.BindPFlag("indexer", flags.Lookup("indexer"))
@@ -75,7 +68,8 @@ func runBot(itemsChannel <-chan search.ExternalResultItem) {
 	token := viper.GetString("telegram_token")
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		log.Panic(err)
+		fmt.Printf("Couldn't initialize telegram bot.")
+		os.Exit(1)
 	}
 	//bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)

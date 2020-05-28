@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/sp0x/torrentd v0.0.0-20200528173223-c891cfce0b24
 	github.com/spf13/cobra v1.0.0
