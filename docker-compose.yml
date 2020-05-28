@@ -1,0 +1,10 @@
+version: "3.7"
+
+
+services:
+
+  rented:
+    build:
+      context: .
+    image: sp0x/rented
+    env_file: .env
