@@ -10,7 +10,7 @@ COPY go.sum .
 
 RUN go mod download
 COPY . .
-RUN go build -o /go/bin/rented -ldflags="-w -s" ./cmd
+RUN go build -o /go/bin/rented -ldflags="-w -s" ./
 # Optional: in case your application uses dynamic linking (often the case with CGO),
 # this will collect dependent libraries so they're later copied to the final image
 # NOTE: make sure you honor the license terms of the libraries you copy and distribute
