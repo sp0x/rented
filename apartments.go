@@ -39,13 +39,7 @@ func getEmbeddedDefinitionsSource() indexer.DefinitionLoader {
 }
 
 func findApartments(cmd *cobra.Command, args []string) {
-	flags := cmd.Flags()
-	flags.StringVarP(&aptIndexer, "indexer", "x", "cityapartment", "The apartment site to use.")
-	_ = viper.BindPFlag("indexer", flags.Lookup("indexer"))
-	defSource := getEmbeddedDefinitionsSource()
-	indexer.Loader = defSource
-
-	//indexer.DefaultDefinitionLoader.
+	indexer.Loader = getEmbeddedDefinitionsSource()
 	//Construct our facade based on the needed indexer.
 	indexerFacade, err := indexer.NewFacade(aptIndexer, &appConfig, categories.Rental)
 	if err != nil {
@@ -58,7 +52,6 @@ func findApartments(cmd *cobra.Command, args []string) {
 	}
 	var searchQuery = strings.Join(args, " ")
 	watchIntervalSec := 30
-	//Create our query
 	query := torznab.ParseQueryString(searchQuery)
 	query.AddCategory(categories.Rental)
 	resultsChan := indexer.Watch(indexerFacade, query, watchIntervalSec)

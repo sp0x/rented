@@ -31,6 +31,10 @@ func init() {
 		appName, appName))
 	_ = viper.BindPFlag("verbose", flags.Lookup("verbose"))
 	_ = viper.BindEnv("verbose")
+
+	localFlags := rootCmd.Flags()
+	localFlags.StringVarP(&aptIndexer, "indexer", "x", "cityapartment", "The apartment site to use.")
+	_ = viper.BindPFlag("indexer", flags.Lookup("indexer"))
 }
 
 func main() {
