@@ -16,7 +16,7 @@ RUN go build -o /go/bin/rented -ldflags="-w -s" ./
 # NOTE: make sure you honor the license terms of the libraries you copy and distribute
 WORKDIR /dist
 RUN cp /go/bin/rented .
-RUN ldd ./torrent-rss | tr -s '[:blank:]' '\n' | grep '^/' | \
+RUN ldd ./rented | tr -s '[:blank:]' '\n' | grep '^/' | \
     xargs -I % sh -c 'mkdir -p $(dirname ./%); cp % ./%;'
 #RUN mkdir -p lib64 && cp /lib64/ld-linux-x86-64.so.2 lib64/
 

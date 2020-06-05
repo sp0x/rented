@@ -25,21 +25,24 @@ func init() {
 
 func findApartments(cmd *cobra.Command, args []string) {
 	flags := cmd.Flags()
-	flags.StringVarP(&aptIndexer, "indexer", "x", "cityapartment", "The appartment site to use.")
+	flags.StringVarP(&aptIndexer, "indexer", "x", "cityapartment", "The apartment site to use.")
 	_ = viper.BindPFlag("indexer", flags.Lookup("indexer"))
-
-	helper := indexer.NewAggregateIndexerHelperWithCategories(&appConfig, categories.Rental)
-	if helper == nil {
+	//Construct our facade based on the needed indexer.
+	indexerFacade, err := indexer.NewFacade(aptIndexer, &appConfig, categories.Rental)
+	if err != nil {
+		fmt.Printf("Couldn't initialize the named indexer `%s`: %s", aptIndexer, err)
+		os.Exit(1)
+	}
+	if indexerFacade == nil {
+		fmt.Printf("Indexer facade was nil")
 		os.Exit(1)
 	}
 	var searchQuery = strings.Join(args, " ")
-	interval := 30
+	watchIntervalSec := 30
 	//Create our query
 	query := torznab.ParseQueryString(searchQuery)
-	query.Page = 0
-	query.Categories = []int{categories.Rental.ID}
-	resultsChan := indexer.Watch(helper, query, interval)
-	//Change this.
+	query.AddCategory(categories.Rental)
+	resultsChan := indexer.Watch(indexerFacade, query, watchIntervalSec)
 	chatBroadcastChan := make(chan search.ExternalResultItem)
 	go runBot(chatBroadcastChan)
 	for true {
@@ -64,6 +67,7 @@ func findApartments(cmd *cobra.Command, args []string) {
 	//}
 }
 
+//Run the telegram bot.
 func runBot(itemsChannel <-chan search.ExternalResultItem) {
 	token := viper.GetString("telegram_token")
 	bot, err := tgbotapi.NewBotAPI(token)
@@ -85,7 +89,7 @@ func runBot(itemsChannel <-chan search.ExternalResultItem) {
 				continue
 			}
 			//We create our chat
-			bolts.StoreChat(&storage.Chat{
+			_ = bolts.StoreChat(&storage.Chat{
 				Username:    update.Message.From.UserName,
 				InitialText: update.Message.Text,
 				ChatId:      update.Message.Chat.ID,
