@@ -17,11 +17,14 @@ ifneq ($(origin CI), undefined)
 	WORKDIR := $(GOPATH)/src/github.com/$(NAME)
 endif
 
+build:
+	go build -o rented -ldflags "-s -w" ./
+
 assets:
 	@echo "Embedding assets as code"
 	bindata -o sites/assets.go ./sites/...
 
-build:
+build-multi-arch:
 	gox -os="${OS}" -arch="${ARCH}" -output="$(NAME).{{.OS}}.{{.Arch}}" -ldflags "-s -w -X main.Rev=`git rev-parse --short HEAD`" -verbose ./...
 
 install-deps:
