@@ -1,0 +1,75 @@
+---
+name: cityapartment.dk
+site: cityapartment
+description: "Denmark rental index site"
+type: private
+language: en-US
+ratelimit: 10
+
+settings:
+  - label: Cookie
+    name: cookie
+    type: text
+
+#Links that can be used, in case we have mirrors.
+links:
+  - https://cityapartment.dk
+
+#Features we're supporting
+caps:
+  categories:
+    rental: Rental
+
+#Our search scheme
+search:
+  maxpages: 20
+  method: post
+  pagesize: 30
+  path: /wp-admin/admin-ajax.php
+  followredirect: true
+
+  #Input arguments
+  inputs:
+    action: ajax_filter_apartments
+    data[price][min]: 0
+    data[price][max]: 14000
+    data[size][min]: 0
+    data[size][max]: 100
+    paged: 1
+    post_type: bolig
+    order[orderby]: apartment_rent
+    order[ordertype]: ASC
+    posts_per_page: 30
+
+  #Search result enumerator
+  rows:
+    selector: "a.apartment-teaser"
+
+  #The fields of an entity(search result)
+  fields:
+    title:
+      selector: .info-wrapper-footer .row:nth-child(1)
+    category:
+      text: rental
+    banner:
+      selector: img.attachment-post-preview
+      attribute: src
+    size:
+      selector: .apartment-size-footer
+      filters:
+        - name: number
+    link:
+      attribute: href
+    id:
+      attribute: href
+    price:
+      selector: .info-wrapper-footer .row:nth-child(2)>div:nth-child(2) strong:nth-child(1)
+    availableFrom:
+      selector: .info-wrapper-footer .row:nth-child(2)>div:nth-child(1) strong:nth-child(1)
+      filters:
+        - name: dateparse
+          args: "02/01/2006"
+    reserved:
+      selector: .ribbon-left
+      filters:
+        - name: bool
