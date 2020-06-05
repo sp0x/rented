@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	log "github.com/sirupsen/logrus"
+	"github.com/sp0x/rented/sites"
 	"github.com/sp0x/torrentd/indexer"
 	"github.com/sp0x/torrentd/indexer/categories"
+	"github.com/sp0x/torrentd/indexer/definitions"
 	"github.com/sp0x/torrentd/indexer/search"
 	"github.com/sp0x/torrentd/storage"
 	"github.com/sp0x/torrentd/torznab"
@@ -23,10 +25,27 @@ func init() {
 	_ = viper.BindEnv("telegram_token")
 }
 
+func getEmbeddedDefinitionsSource() indexer.DefinitionLoader {
+	x := indexer.CreateEmbeddedDefinitionSource(sites.GzipAssetNames(), func(key string) ([]byte, error) {
+		fullname := fmt.Sprintf("sites/%s.yml", key)
+		data, err := definitions.GzipAsset(fullname)
+		if err != nil {
+			return nil, err
+		}
+		data, _ = definitions.UnzipData(data)
+		return data, nil
+	})
+	return x
+}
+
 func findApartments(cmd *cobra.Command, args []string) {
 	flags := cmd.Flags()
 	flags.StringVarP(&aptIndexer, "indexer", "x", "cityapartment", "The apartment site to use.")
 	_ = viper.BindPFlag("indexer", flags.Lookup("indexer"))
+	defSource := getEmbeddedDefinitionsSource()
+	indexer.Loader = defSource
+
+	//indexer.DefaultDefinitionLoader.
 	//Construct our facade based on the needed indexer.
 	indexerFacade, err := indexer.NewFacade(aptIndexer, &appConfig, categories.Rental)
 	if err != nil {
@@ -43,6 +62,11 @@ func findApartments(cmd *cobra.Command, args []string) {
 	query := torznab.ParseQueryString(searchQuery)
 	query.AddCategory(categories.Rental)
 	resultsChan := indexer.Watch(indexerFacade, query, watchIntervalSec)
+	readIndexer(resultsChan)
+}
+
+//Reads the channel that's the result of watching an indexer.
+func readIndexer(resultsChan <-chan search.ExternalResultItem) {
 	chatBroadcastChan := make(chan search.ExternalResultItem)
 	go runBot(chatBroadcastChan)
 	for true {
