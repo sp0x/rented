@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/sp0x/rented/sites"
 	"github.com/sp0x/torrentd/indexer"
@@ -14,6 +15,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -38,8 +41,33 @@ func getEmbeddedDefinitionsSource() indexer.DefinitionLoader {
 	return x
 }
 
+func getFileDefinitionsSource() indexer.DefinitionLoader {
+	localDirectory := ""
+	if cwd, err := os.Getwd(); err == nil {
+		localDirectory = filepath.Join(cwd, "sites")
+	}
+	home, _ := homedir.Dir()
+	homeDefsDir := path.Join(home, ".rented", "sites")
+
+	x := &indexer.FileIndexLoader{
+		Directories: []string{
+			localDirectory,
+			homeDefsDir,
+		},
+	}
+	return x
+}
+
+func getIndexLoader() *indexer.MultipleDefinitionLoader {
+	return &indexer.MultipleDefinitionLoader{
+		getEmbeddedDefinitionsSource(),
+		getFileDefinitionsSource(),
+	}
+}
+
 func findApartments(cmd *cobra.Command, args []string) {
-	indexer.Loader = getEmbeddedDefinitionsSource()
+	indexer.Loader = getIndexLoader()
+
 	//Construct our facade based on the needed indexer.
 	indexerFacade, err := indexer.NewFacade(aptIndexer, &appConfig, categories.Rental)
 	if err != nil {

@@ -10,5 +10,8 @@ Environment variables:
 
 ### Supported sites  
 - Cityapartment.dk - `cityapartment`
-In order to add a new site, add a new Yaml file inside the sites directory and rebuild.  
-For now this project uses embedded site definitions only.
+  
+You can add new sites in a few ways:
+- Add a new YML file in the `./sites/` directory
+- Add a new YML file in the `~./.rented/sites/` directory
+- Add a new YML file in the sites directory of the project and rebuild it.
