@@ -3,12 +3,9 @@ package main
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/mitchellh/go-homedir"
-	"github.com/sp0x/rented/sites"
 	"github.com/sp0x/torrentd/bots"
 	"github.com/sp0x/torrentd/indexer"
 	"github.com/sp0x/torrentd/indexer/categories"
-	"github.com/sp0x/torrentd/indexer/definitions"
 	"github.com/sp0x/torrentd/indexer/search"
 	"github.com/sp0x/torrentd/torznab"
 	"github.com/spf13/cobra"
@@ -26,7 +23,6 @@ func init() {
 
 func findApartments(_ *cobra.Command, args []string) {
 	indexer.Loader = getIndexLoader()
-
 	//Construct our facade based on the needed indexer.
 	indexerFacade, err := indexer.NewFacade(aptIndexer, &appConfig, categories.Rental)
 	if err != nil {
@@ -60,8 +56,7 @@ func waitForResultsAndBroadcastThem(resultsChan <-chan search.ExternalResultItem
 	go func() {
 		_ = telegram.FeedBroadcast(chatMessagesChannel)
 	}()
-	for {
-		result := <-resultsChan
+	for result := range resultsChan {
 		//log.Infof("New result: %s\n", result)
 		if result.IsNew() || result.IsUpdate() {
 			price := result.GetField("price")
