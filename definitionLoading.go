@@ -10,7 +10,7 @@ import (
 func getEmbeddedDefinitionsSource() indexer.DefinitionLoader {
 	x := indexer.CreateEmbeddedDefinitionSource(sites.GzipAssetNames(), func(key string) ([]byte, error) {
 		fullname := fmt.Sprintf("sites/%s.yml", key)
-		data, err := definitions.GzipAsset(fullname)
+		data, err := sites.GzipAsset(fullname)
 		if err != nil {
 			return nil, err
 		}
