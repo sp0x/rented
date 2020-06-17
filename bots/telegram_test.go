@@ -74,18 +74,15 @@ func TestTelegramRunner_FeedBroadcast(t *testing.T) {
 		t.Run(tt.name, func(t1 *testing.T) {
 			tgram, _ := NewTelegram("asd", MockedApiProvider)
 			//Do the feeding
-			err := tgram.FeedBroadcast(tt.args.messageChannel)
-			g.Expect(err).ShouldNot(BeNil())
-			tt.args.messageChannel <- ChatMessage{
-				Text:   "",
-				Banner: "",
-			}
-
-			//t := &TelegramRunner{
-			//	bot:     tt.fields.bot,
-			//	updates: tt.fields.updates,
-			//	bolts:   tt.fields.bolts,
+			go func() {
+				err := tgram.FeedBroadcast(tt.args.messageChannel)
+				g.Expect(err).ShouldNot(BeNil())
+			}()
+			//tt.args.messageChannel <- ChatMessage{
+			//	Text:   "",
+			//	Banner: "",
 			//}
+			//close(tt.args.messageChannel)
 		})
 	}
 }

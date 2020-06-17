@@ -10,9 +10,7 @@ import (
 	"path"
 )
 
-var appConfig config.ViperConfig
-
-func initConfig() {
+func initConfig(appName string) config.ViperConfig {
 	//We load the default config file
 	homeDir, _ := homedir.Dir()
 	if configFile != "" {
@@ -25,6 +23,7 @@ func initConfig() {
 		viper.SetConfigName(fmt.Sprintf(".%s", appName))
 	}
 	viper.AutomaticEnv()
+	var appConfig config.ViperConfig
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			config.SetDefaults(&appConfig)
@@ -41,5 +40,6 @@ func initConfig() {
 	} else {
 
 	}
+	return appConfig
 
 }

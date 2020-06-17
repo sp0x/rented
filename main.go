@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/sp0x/torrentd/config"
 	"github.com/sp0x/torrentd/db"
 	"github.com/sp0x/torrentd/indexer/search"
 	"github.com/spf13/cobra"
@@ -16,14 +17,21 @@ var rootCmd = &cobra.Command{
 	Run:   findApartments,
 }
 var configFile = ""
+var appConfig config.ViperConfig
 
-func init() {
-	//Init our db
+func migrateDb() {
 	_ = os.MkdirAll("./db", os.ModePerm)
 	gormDb := db.GetOrmDb("")
 	defer gormDb.Close()
 	gormDb.AutoMigrate(&search.ExternalResultItem{})
-	cobra.OnInitialize(initConfig)
+}
+
+func init() {
+	//Init our db
+	migrateDb()
+	cobra.OnInitialize(func() {
+		appConfig = initConfig(appName)
+	})
 	flags := rootCmd.PersistentFlags()
 	var verbose bool
 	flags.BoolVarP(&verbose, "verbose", "v", false, "Show more logs")

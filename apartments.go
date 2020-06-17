@@ -22,7 +22,6 @@ import (
 var aptIndexer string
 
 func init() {
-	//flags := cmdGetApartments.Flags()
 	_ = viper.BindEnv("indexer")
 	_ = viper.BindEnv("telegram_token")
 }
